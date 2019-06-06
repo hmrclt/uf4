@@ -72,7 +72,6 @@ class SimpleForm[A, Html](field: FormField[A, Html]) extends GenericPlayAsk[A, H
           // they're replaying the journey
           Future.successful(PageOut(currentId :: path, db, AskResult.Success(data)))
         case _ =>
-          // either trying to jump ahead (None) or data no longer validates (code change or corruption)
           Future.successful(PageOut(path, db, AskResult.GotoPath(currentId)))
       }
     }

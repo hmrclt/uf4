@@ -19,14 +19,7 @@ lazy val root = project.in(file("."))
   )
 
 scalaVersion := "2.11.12"
-
-// Setting this to "2.11.12", "2.12.8" for root causes play-interpreter25 to fail
-// see https://github.com/sbt/sbt/issues/3465
 crossScalaVersions := Seq("2.11.12")
-// annoyingly this seems to mean that running `compile` without first `++ 2.11.12`
-// causes the build to fail even though everything else works fine.
-
-
 
 val commonSettings = Seq(
   organization := "com.luketebbs.uniform",  
