@@ -4,6 +4,7 @@ import scala.util.parsing.combinator._
 import cats.Monoid
 
 trait UniformMessages[A] {
+
   def apply(key: String, args: Any*): A =
     get(key, args:_*).getOrElse(throw new NoSuchElementException(s"key not found: $key"))
   def apply(keys: List[String], args: Any*): A =

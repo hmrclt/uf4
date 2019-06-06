@@ -18,7 +18,7 @@ lazy val root = project.in(file("."))
     publishArtifact := false
   )
 
-scalaVersion := "2.12.8"
+scalaVersion := "2.11.12"
 
 // Setting this to "2.11.12", "2.12.8" for root causes play-interpreter25 to fail
 // see https://github.com/sbt/sbt/issues/3465
@@ -29,6 +29,7 @@ crossScalaVersions := Seq("2.11.12")
 
 
 val commonSettings = Seq(
+  organization := "com.luketebbs.uniform",  
   scalaVersion := "2.12.8",
   crossScalaVersions := Seq("2.11.12", "2.12.8"),
   scalacOptions ++= ProjectSettings.defaultScalaCopts,
@@ -52,8 +53,10 @@ lazy val core = crossProject(JSPlatform, JVMPlatform)
       "org.scala-lang" % "scala-reflect" % scalaVersion.value,
       "org.typelevel" %%% "cats-core" % "1.6.0",
       "org.scala-lang.modules" %%% "scala-parser-combinators" % "1.1.1",
-      "com.chuusai" %%% "shapeless" % "2.3.3"
-    )
+      "com.chuusai" %%% "shapeless" % "2.3.3",
+      "com.github.mpilquist" %%% "simulacrum" % "0.18.0"      
+    ),
+    addCompilerPlugin("org.scalamacros" % "paradise" % "2.1.0" cross CrossVersion.full)  
   )
 
 lazy val `common-web` = crossProject(JSPlatform, JVMPlatform)
@@ -63,7 +66,7 @@ lazy val `common-web` = crossProject(JSPlatform, JVMPlatform)
     addCompilerPlugin("org.scalamacros" % "paradise" % "2.1.0" cross CrossVersion.full),
     libraryDependencies ++= Seq(
       "com.chuusai" %%% "shapeless" % "2.3.3",
-      "com.github.mpilquist" %%% "simulacrum" % "0.14.0"
+      "com.github.mpilquist" %%% "simulacrum" % "0.18.0"
     )
   )
   .dependsOn(core)
@@ -87,3 +90,21 @@ lazy val `interpreter-play`: sbtcrossproject.CrossProject =
 lazy val `interpreter-cli` = project
   .settings(commonSettings)
   .dependsOn(core.jvm, `common-web`.jvm)
+
+lazy val `example-play` = project.settings(commonSettings)
+  .enablePlugins(PlayScala)
+  .dependsOn(`interpreter-play`.projects(Play26), core.jvm)
+  .settings(
+    TwirlKeys.templateImports ++= Seq(
+      "ltbs.uniform._",
+      "ltbs.uniform.interpreters.playframework._"
+    ),    
+    PlayKeys.playDefaultPort := 9001,
+    libraryDependencies ++= Seq(
+      filters,
+      guice
+    ),
+    libraryDependencies += "org.scalatest" %%% "scalatest" % "3.0.5" % "test",
+    initialCommands in console := "import cats.implicits._; import ltbs.uniform._; import ltbs.uniform.interpreters.playframework._; implicit val messages: Messages = NoopMessages",
+    initialCommands in consoleQuick := """import cats.implicits._;"""
+  )

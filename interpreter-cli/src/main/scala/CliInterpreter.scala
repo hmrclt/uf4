@@ -11,7 +11,7 @@ trait TellCli[A] {
 }
 
 trait AskCli[A] {
-  def apply(in: String, validation: List[List[ValidationRule[A]]]): A
+  def apply(in: String, validation: List[List[Rule[A]]]): A
 }
 
 class CliInterpreter[
@@ -23,7 +23,7 @@ class CliInterpreter[
     id: String,
     t: Tell,
     default: Option[Ask],
-    validation: List[List[ValidationRule[Ask]]],
+    validation: List[List[Rule[Ask]]],
     customContent: Map[String,(String,List[Any])]
   )(
     implicit selectorTell : Selector[SupportedTell, Tell],
@@ -64,7 +64,7 @@ object CliApp extends App {
 
   def askCliInstance[A](f: String => Either[String,A]) = new AskCli[A] {
     @annotation.tailrec
-    def apply(key: String, validation: List[List[ValidationRule[A]]]): A = {
+    def apply(key: String, validation: List[List[Rul[eA]]]): A = {
       print(s"$key: ")
       val rawIn = io.StdIn.readLine()
 
