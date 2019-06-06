@@ -4,8 +4,6 @@ import shapeless.{HNil => _, `::` => _, _}, ops.hlist.Selector
 import reflect.runtime.universe.WeakTypeTag
 import scala.language.higherKinds
 
-// type ErrorTree2 = List[(Error, NEL[Path])]
-
 trait Language[UF[_], SupportedTell <: HList, SupportedAsk <: HList]{
 
   def interact[Tell: WeakTypeTag, Ask: WeakTypeTag](

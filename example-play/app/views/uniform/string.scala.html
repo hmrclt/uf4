@@ -1,10 +1,8 @@
 @import cats.implicits._
 
-@(key: String, values: String, errors: ErrorTree, messages: UniformMessages[Html])
+@(key: List[String], values: String, errors: ErrorTree, messages: UniformMessages[Html])
 
-@path=@{key.split("[.]").filter(_.nonEmpty).tail.toList}
-
-<input class="govuk-input govuk-!-width-two-thirds @if(errors.definedAtPath(path.drop(1))) {govuk-input--error}"
+<input class="govuk-input govuk-!-width-two-thirds @if(errors.definedAtRoot) {govuk-input--error}"
        id="@key"
        name="@key"
        value="@{values}" />

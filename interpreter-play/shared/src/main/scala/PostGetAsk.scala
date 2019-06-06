@@ -7,7 +7,8 @@ trait FormField[A, Html]{
   def encode(in: A): Input
   def decode(out: Input): Either[ErrorTree,A]
   def render(
-    path: List[String],
+    key: List[String],
+    path: Path,
     data: Option[Input],
     errors: ErrorTree,
     messages: UniformMessages[Html]
@@ -17,29 +18,25 @@ trait FormField[A, Html]{
 class SimpleForm[A, Html](field: FormField[A, Html]) extends GenericPlayAsk[A, Html] {
 
   def page(
-    targetId: List[String], // the uri the user agent is asking for
     currentId: List[String], // the current step in the journey
+    targetId: List[String], // the uri the user agent is asking for
     default: Option[A],
     validation: List[List[Rule[A]]],
     config: JourneyConfig,
     submittedData: Option[Input],
-    path: List[String],
+    path: Path, // previous steps, maybe this should be a chain?
     db: DB,
     messages: UniformMessages[Html]
   ): Future[PageOut[A,Html]] = {
     import cats.implicits._
-    lazy val rawDbData: Option[String] = db.get(targetId)
+    lazy val rawDbData: Option[String] = db.get(currentId)
     lazy val dbObject: Option[Either[ErrorTree,A]] =
       rawDbData map {Input.fromUrlEncodedString(_) >>= field.decode >>= validation.combined.either}
 
-    println(s"PATH: $targetId === $currentId")
-
-    println("KEY:" + currentId.lastOption.toString)
-    val localData = currentId.lastOption match {
+    val localData = targetId.lastOption match {
       case Some(key) => submittedData.map(_.subTree(key))
       case None => submittedData
     }
-    println("localData:" + localData)
 
     if (targetId === currentId) {
       localData match {
@@ -55,28 +52,28 @@ class SimpleForm[A, Html](field: FormField[A, Html]) extends GenericPlayAsk[A, H
               .flatMap(_.toOption)
               .orElse(default.map{x => field.encode(x)})
 
-          val result = field.render(path, prepopulatedData, errors, messages)
-          Future.successful(PageOut(currentId, db, AskResult.Payload(result, errors)))
+          val result = field.render(currentId, path, prepopulatedData, errors, messages)
+          Future.successful(PageOut(path, db, AskResult.Payload(result, errors)))
         case Some(rawPostData) =>
           val postObject: Either[ErrorTree,A] =
             field.decode(rawPostData) >>= validation.combined.either
 
           postObject match {
             case Left(errors) =>
-              val result = field.render(path, Some(rawPostData), errors, messages)
-              Future.successful(PageOut(currentId, db, AskResult.Payload(result, errors)))
+              val result = field.render(currentId, path, Some(rawPostData), errors, messages)
+              Future.successful(PageOut(path, db, AskResult.Payload(result, errors)))
             case Right(o) =>
-              Future.successful(PageOut(currentId, db + (currentId -> rawPostData.toUrlEncodedString), AskResult.Success(o)))
+              Future.successful(PageOut(currentId :: path, db + (currentId -> rawPostData.toUrlEncodedString), AskResult.Success(o)))
           }
       }
     } else {
       dbObject match {
-        case Some(Right(data)) =>
+        case Some(Right(data)) if targetId != Nil && !path.contains(targetId) =>
           // they're replaying the journey
-          Future.successful(PageOut(currentId, db, AskResult.Success(data)))
+          Future.successful(PageOut(currentId :: path, db, AskResult.Success(data)))
         case _ =>
           // either trying to jump ahead (None) or data no longer validates (code change or corruption)
-          Future.successful(PageOut(currentId, db, AskResult.GotoPath(targetId)))
+          Future.successful(PageOut(path, db, AskResult.GotoPath(currentId)))
       }
     }
   }

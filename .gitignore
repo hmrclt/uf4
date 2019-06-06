@@ -1,2 +1,6 @@
 **target
 **~
+.bloop
+.metals
+*.log
+project/.bloop

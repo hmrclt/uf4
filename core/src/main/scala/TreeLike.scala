@@ -3,8 +3,6 @@ package ltbs.uniform
 import simulacrum._
 import scala.language.implicitConversions
 import cats.data.{NonEmptyList => NEL}
-import reflect.runtime.universe._
-import reflect.ClassTag
 
 @typeclass trait TreeLike[T] {
 
@@ -21,12 +19,21 @@ import reflect.ClassTag
     valueAtRoot(atPath(a, key))
   }
 
+  def valueAtRoot(a: T): Option[Value]
+
+  def definedAt(a: T, key: Key): Boolean =
+    valueAt(a, key).isDefined
+
   def definedAtPath(a: T, key: List[Key]): Boolean =
     valueAtPath(a, key).isDefined
 
-  def valueAtRoot(a: T): Option[Value]
+  def definedAtRoot(a: T): Boolean =
+    valueAtRoot(a).isDefined
 
-  def empty: T 
+  def isEmpty(a: T): Boolean = a == empty
+  def isNonEmpty(a: T): Boolean = !isEmpty(a)
+
+  def empty: T
 
   def one(in: Value): T
 
@@ -96,11 +103,12 @@ trait TreeLikeInstances {
 
     def valueAtRoot(a: ErrorTree): Option[NEL[ErrorMsg]] = a.get(NEL.one(Nil))
 
-    def simplified(a: ErrorTree): Map[Path, ErrorMsg] = a flatMap {
+    def simplified(a: ErrorTree): Map[InputPath, ErrorMsg] = a flatMap {
       case (paths, errors) =>
         errors.toList.map{ error =>
           (paths.head, error)
         }
     }
+
   }
 }

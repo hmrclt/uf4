@@ -25,22 +25,11 @@ class BeardController @Inject()(implicit val messagesApi: MessagesApi) extends P
     errors: ErrorTree,
     tell: Html,
     ask: Html,
-    breadcrumbs: List[String],
+    breadcrumbs: Path,
     request: Request[AnyContent],
     messages: UniformMessages[Html]
   ): Html = 
-      views.html.chrome(key.mkString("."), errors, Html(tell.toString + ask.toString), breadcrumbs.drop(1))(messages, request)
-
-  def renderForm(
-    key: List[String],
-    errors: ErrorTree,
-    form: Html,
-    breadcrumbs: List[String],
-    request: Request[AnyContent],
-    messagesIn: UniformMessages[Html]
-  ): Html = {
-    views.html.chrome(key.last, errors, form, breadcrumbs)(messagesIn, request)
-  }
+      views.html.chrome(key.mkString("."), errors, Html(tell.toString + ask.toString), breadcrumbs)(messages, request)
 
   implicit val persistence: PersistenceEngine = DebugPersistence(UnsafePersistence())
 
@@ -60,14 +49,15 @@ class BeardController @Inject()(implicit val messagesApi: MessagesApi) extends P
 
     def encode(in: Int): Input = Input.one(List(in.toString))
     def render(
-      path: List[String],
+      key: List[String],
+      path: Path,
       data: Option[Input],
       errors: ErrorTree,
       messages: UniformMessages[Html]
     ): Html = {
       println(s"data: $data")
       val existingValue: String = data.flatMap(_.valueAtRoot.flatMap{_.headOption}).getOrElse("")
-      views.html.uniform.string(path.mkString("."), existingValue, errors, messages)
+      views.html.uniform.string(key, existingValue, errors, messages)
     }
   }
 
@@ -79,7 +69,7 @@ class BeardController @Inject()(implicit val messagesApi: MessagesApi) extends P
       validation: List[List[Rule[Boolean]]],
       config: JourneyConfig,
       submittedData: Option[Input],
-      path: List[String],
+      path: Path,
       db: DB,
       messages: UniformMessages[Html]
     ): Future[PageOut[Boolean,Html]] = ???
@@ -87,22 +77,9 @@ class BeardController @Inject()(implicit val messagesApi: MessagesApi) extends P
 
   import programs._
 
-  def beardAction(path: String) = Action.async { implicit request: Request[AnyContent] =>
+  def beardAction(targetId: String) = Action.async { implicit request: Request[AnyContent] =>
     val playProgram = greasy(new FuturePlayInterpreter)
-    run(playProgram, path){ _ => Future.successful(Ok("Fin"))}
+    run(playProgram, targetId){ _ => Future.successful(Ok("Fin"))}
   }
-
-  def stupid(path: String) = Action.async { implicit request: Request[AnyContent] =>
-
-    implicit def autoField[A] = new FormField[A,Html] {
-      def decode(out: ltbs.uniform.Input): Either[ltbs.uniform.ErrorTree,A] = ???
-      def encode(in: A): ltbs.uniform.Input = ???
-      def render(path: List[String],data: Option[ltbs.uniform.Input],errors: ltbs.uniform.ErrorTree,messages: ltbs.uniform.UniformMessages[play.twirl.api.Html]): play.twirl.api.Html = ???
-    }
-
-    val playProgram = greasy2(new FuturePlayInterpreter)
-    run(playProgram, path){ _ => Future.successful(Ok("Fin"))}
-  }
-
 
 }

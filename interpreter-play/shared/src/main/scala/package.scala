@@ -10,12 +10,12 @@ import play.twirl.api.{Html => TwirlHtml}
 package object playframework {
 
   // New
-  type Path = List[String]
+  type Path = List[List[String]]
   type JourneyConfig = String
 
   type Encoded = String
 
-  type WebInner[A] = RWST[Future, (JourneyConfig, Path, Request[AnyContent]), Unit, (Path, DB), A]
+  type WebInner[A] = RWST[Future, (JourneyConfig, List[String], Request[AnyContent]), Unit, (Path, DB), A]
   type WebMonad[A] = EitherT[WebInner, Result, A]
 
   type DB = Map[List[String],String]
@@ -47,7 +47,8 @@ package object playframework {
     def decode(out: Input): Either[ltbs.uniform.ErrorTree,Unit] = Right(())
     def encode(in: Unit): Input = Input.empty
     def render(
-      path: List[String],
+      key: List[String],
+      path: Path,
       data: Option[Input],
       errors: ErrorTree,
       messages: UniformMessages[TwirlHtml]

@@ -1,6 +1,6 @@
-@import uniform._
+@import uniform._, interpreters.playframework._
 
-@(key: String, errors: Any, content: Html, breadcrumbs: List[String] = Nil)(implicit messages: ltbs.uniform.UniformMessages[Html], request: Request[AnyContent])
+@(key: String, errors: Any, content: Html, breadcrumbs: Path)(implicit messages: ltbs.uniform.UniformMessages[Html], request: Request[AnyContent])
 <!DOCTYPE html>
 <html lang="en" class="govuk-template js-enabled">
   <head>
@@ -28,6 +28,12 @@
     <div class="govuk-width-container">
       <main class="govuk-main-wrapper " id="main-content" role="main">
         <div id="mainBody">
+
+	  <div style="border: 2px solid green;">
+	    BREADCRUMBS:@{breadcrumbs}
+	    
+	  </div>
+	  
 	  @for(back <- breadcrumbs.headOption) {
             <a href="@back" class="govuk-back-link">@messages(List(s"back-to-$back","back"))</a>
           }

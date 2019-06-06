@@ -7,6 +7,7 @@ import shapeless._, ops.hlist.Selector
 import concurrent.{ExecutionContext, Future}
 import cats.data.{EitherT, RWST}
 import cats.implicits._
+import cats.Monoid
 
 abstract class PlayInterpreter[Html: Writeable](
   implicit ec: ExecutionContext
@@ -25,7 +26,7 @@ abstract class PlayInterpreter[Html: Writeable](
     errors: ErrorTree,
     tell: Html,
     ask: Html,
-    breadcrumbs: List[String],
+    breadcrumbs: Path,
     request: Request[AnyContent],
     messages: UniformMessages[Html]
   ): Html
@@ -101,10 +102,10 @@ abstract class PlayInterpreter[Html: Writeable](
     implicit request: Request[AnyContent],
     persistence: PersistenceEngine
   ): Future[Result] = {
-    val path: List[String] = id.split("/").toList.dropWhile(_.isEmpty)
+    val targetId: List[String] = id.split("/").toList.dropWhile(_.isEmpty)
 
     persistence(request){ db => 
-      program.value.run((config,path,request),(path,db)) flatMap {
+      program.value.run((config,targetId,request),(Monoid[Path].empty,db)) flatMap {
         case (_, (_,newDb), Left(result)) =>
           Future.successful((newDb,result))
         case (_, (_,newDb), Right(value)) =>

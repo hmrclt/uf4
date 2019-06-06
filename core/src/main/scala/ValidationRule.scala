@@ -35,7 +35,7 @@ trait Rule[A] {
 
 object Rule {
 
-  def assert[A](pred: A => Boolean)(error: ErrorMsg, pathH: Path, pathT: Path*) = {
+  def assert[A](pred: A => Boolean)(error: ErrorMsg, pathH: InputPath, pathT: InputPath*) = {
     val paths = NonEmptyList(pathH,pathT.toList)
     new Rule[A] {
       def apply(in: A) = if (pred(in))
@@ -45,10 +45,10 @@ object Rule {
     }
   }
 
-  def apply[A](rules: (A => Boolean, (ErrorMsg, NonEmptyList[Path]))*): List[List[Rule[A]]] = 
+  def apply[A](rules: (A => Boolean, (ErrorMsg, NonEmptyList[InputPath]))*): List[List[Rule[A]]] = 
     List(rules.toList.map{case (r, msg) => fromPred(r, msg)})
 
-  def fromPred[A](pred: A => Boolean, msg: (ErrorMsg, NonEmptyList[Path])): Rule[A] = new Rule[A] {
+  def fromPred[A](pred: A => Boolean, msg: (ErrorMsg, NonEmptyList[InputPath])): Rule[A] = new Rule[A] {
     def apply(in: A) = if (pred(in)) ErrorTree.empty else Map(msg._2 -> NonEmptyList.one(msg._1))
   }
 
