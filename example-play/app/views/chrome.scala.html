@@ -1,6 +1,6 @@
 @import uniform._, interpreters.playframework._
 
-@(key: String, errors: Any, content: Html, breadcrumbs: Path)(implicit messages: ltbs.uniform.UniformMessages[Html], request: Request[AnyContent])
+@(key: String, errors: ErrorTree, content: Html, breadcrumbs: Path)(implicit messages: ltbs.uniform.UniformMessages[Html], request: Request[AnyContent])
 <!DOCTYPE html>
 <html lang="en" class="govuk-template js-enabled">
   <head>
@@ -52,6 +52,10 @@
               </ol>
 	    </div>
           *****************************************@
+
+	    @if(errors.nonEmpty) {
+	      @errorsummary(key, Input.empty, errors, messages)
+	    }
       @helper.form(action = play.api.mvc.Call("post", key)) {
         @helper.CSRF.formField 
         @content

@@ -9,7 +9,7 @@ package object uniform extends TreeLike.ToTreeLikeOps with TreeLikeInstances {
 
   type InputPath = List[String]
   type Input = Map[InputPath, List[String]]
-  object Input extends MapTree[String, List[String]] {
+  implicit object Input extends MapTree[String, List[String]] {
     def fromUrlEncodedString(in: String): Either[ErrorTree,Input] = {
       val ungrouped: List[(String, String)] =
         in.split("&").toList
@@ -34,7 +34,6 @@ package object uniform extends TreeLike.ToTreeLikeOps with TreeLikeInstances {
     }
   }
 
-  implicit val inputTree = Input
   type ErrorTree = Map[NonEmptyList[InputPath], NonEmptyList[ErrorMsg]]
   lazy val ErrorTree = treeLikeErrorTree
 

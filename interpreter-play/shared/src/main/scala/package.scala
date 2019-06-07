@@ -6,40 +6,17 @@ import play.api.mvc.{ Request, Result, AnyContent }
 import scala.concurrent.Future
 import cats.syntax.eq._
 import play.twirl.api.{Html => TwirlHtml}
+import common.web._
 
-package object playframework {
-
-  // New
-  type Path = List[List[String]]
-  type JourneyConfig = String
+package object playframework extends common.web.webcommon {
 
   type Encoded = String
-
   type WebInner[A] = RWST[Future, (JourneyConfig, List[String], Request[AnyContent]), Unit, (Path, DB), A]
   type WebMonad[A] = EitherT[WebInner, Result, A]
 
-  type DB = Map[List[String],String]
+  type FormField[A,B] = common.web.FormField[A,B]
 
-  def relativePath(from: List[String], to: List[String]): String = {
-    import cats.instances.string._
-    val (rem, add) = removeCommon(from, to)
-      (rem.drop(1).map{_ => ".."} ++ add).mkString("/")
-  }
-
-  @annotation.tailrec
-  def removeCommon[B: cats.Eq](
-    x: List[B],
-    y: List[B]
-  ): (List[B], List[B]) = (x,y) match {
-    case (x::xs, y::ys) if x === y => removeCommon(xs, ys)
-    case a => a
-  }
-
-  implicit def formToPlayAsk[A, Html](
-    implicit field: FormField[A, Html]
-  ): GenericPlayAsk[A, Html] = new SimpleForm(field)
-
-  implicit val tellTwirlUnit = new GenericPlayTell[Unit,TwirlHtml] {
+  implicit val tellTwirlUnit = new GenericWebTell[Unit,TwirlHtml] {
     def render(in: Unit):TwirlHtml = TwirlHtml("")
   }
 

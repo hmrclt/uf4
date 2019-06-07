@@ -3,18 +3,19 @@ package interpreters.playframework
 
 import play.api._,mvc._,http.Writeable
 import reflect.runtime.universe.WeakTypeTag
-import shapeless._, ops.hlist.Selector
+import shapeless.{Path => _,_}, ops.hlist.Selector
 import concurrent.{ExecutionContext, Future}
 import cats.data.{EitherT, RWST}
 import cats.implicits._
 import cats.Monoid
+import common.web._
 
 abstract class PlayInterpreter[Html: Writeable](
   implicit ec: ExecutionContext
-) extends Compatibility.PlayController {
+) extends Compatibility.PlayController with InferFormField[Html] {
 
-  type PlayAsk[A] = GenericPlayAsk[A, Html]
-  type PlayTell[A] = GenericPlayTell[A, Html]
+  type PlayAsk[A] = GenericWebAsk[A, Html]
+  type PlayTell[A] = GenericWebTell[A, Html]
 
   def messages(
     request: Request[AnyContent],

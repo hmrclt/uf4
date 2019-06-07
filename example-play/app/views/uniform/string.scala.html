@@ -3,7 +3,7 @@
 @(key: List[String], values: String, errors: ErrorTree, messages: UniformMessages[Html])
 
 <input class="govuk-input govuk-!-width-two-thirds @if(errors.definedAtRoot) {govuk-input--error}"
-       id="@key"
-       name="@key"
+       id="@{key.mkString("_")}"
+       name="@{key.mkString(".")}"
        value="@{values}" />
 

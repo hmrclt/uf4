@@ -109,16 +109,15 @@ package object programs {
   case class DataType100(i: String)
 
   type TellTypes = NilTypes
-  type AskTypes = Int :: Boolean :: NilTypes
+  type AskTypes = (Int, Int) :: Int :: Boolean :: NilTypes
 
-  def greasy[F[_]: Monad](
+  def greasy[F[_] : Monad](
     interpreter: Language[F, TellTypes, AskTypes]
   ): F[Int] = {
     import interpreter._
     for {
       age           <- ask[Int]("age")
-      height           <- ask[Int]("height")
-      height2           <- ask[Int]("height2")
+      h2           <- ask[(Int,Int)]("height")
       height3           <- ask[Int]("height3")                  
       food          <- ask[Boolean]("wantFood")
       tea           <- ask[Boolean]("wantTea")

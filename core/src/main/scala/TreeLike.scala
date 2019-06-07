@@ -9,6 +9,8 @@ import cats.data.{NonEmptyList => NEL}
   type Key
   type Value
 
+  def prefixWith(a: T, key: Key): T
+
   def subTree(a: T, key: Key): T
   def /(a: T, key: Key): T = subTree(a,key)
 
@@ -40,10 +42,10 @@ import cats.data.{NonEmptyList => NEL}
   def atPath(a: T, path: List[Key]): T = {
 
     @annotation.tailrec
-    def inner(a: T, path: List[Key]): T = {
-      path match {
-        case Nil => a
-        case (x::xs) => inner(subTree(a,x), xs)
+    def inner(a1: T, path1: List[Key]): T = {
+      path1 match {
+        case Nil => a1
+        case (x::xs) => inner(subTree(a1,x), xs)
       }
     }
     inner(a, path)
@@ -52,8 +54,6 @@ import cats.data.{NonEmptyList => NEL}
 }
 
 trait TreeLikeInstances {
-
-  def mapTree[K,V]: TreeLike[Map[List[K],V]] = new MapTree[K,V]
 
   class MapTree[K,V] extends TreeLike[Map[List[K],V]] {
     type Key = K
@@ -66,8 +66,12 @@ trait TreeLikeInstances {
       }
 
     val empty: Map[List[K],V] = Map.empty
-    def one(in: Value): Map[List[Key],Value] = Map(List.empty[Key] -> in)
-    def valueAtRoot(a: Map[List[Key],Value]): Option[Value] = a.get(Nil)
+    def one(in: Value): T = Map(List.empty[Key] -> in)
+    def valueAtRoot(a: T): Option[Value] = a.get(List.empty[Key])
+
+    def prefixWith(a: T, key: Key): T = a.map{ case (k,v) =>
+      (k :+ key) -> v
+    }
   }
 
   implicit val treeLikeErrorTree = new TreeLike[ErrorTree] {
@@ -109,6 +113,11 @@ trait TreeLikeInstances {
           (paths.head, error)
         }
     }
+
+    def prefixWith(a: ErrorTree, key: String): ErrorTree = 
+      a.map{ case (k,v) =>
+        (k.map{_ :+ key}) -> v
+      }
 
   }
 }

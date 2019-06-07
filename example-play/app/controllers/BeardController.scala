@@ -1,11 +1,9 @@
 package controllers
 
 
-import cats.implicits._
-import cats.kernel.Monoid
+import cats.implicits._, cats.Monoid
 import javax.inject._
 import ltbs.uniform._, interpreters.playframework._
-import play.api._
 import play.api.i18n.{Messages => _, _}
 import play.api.mvc._
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -14,6 +12,11 @@ import play.twirl.api.{Html, HtmlFormat}
 
 @Singleton
 class BeardController @Inject()(implicit val messagesApi: MessagesApi) extends PlayInterpreter[Html] with I18nSupport {
+
+  val mon: Monoid[Html] = new Monoid[Html] {
+    def empty: Html = Html("")
+    def combine(a: Html, b: Html) = Html(a.toString + b.toString)
+  }
 
   def messages(request: Request[AnyContent], customContent: Map[String,(String, List[Any])]): UniformMessages[Html] = (
 //    convertMessages(messagesApi.preferred(request)) |+|
@@ -72,7 +75,7 @@ class BeardController @Inject()(implicit val messagesApi: MessagesApi) extends P
       path: Path,
       db: DB,
       messages: UniformMessages[Html]
-    ): Future[PageOut[Boolean,Html]] = ???
+    ): Future[common.web.PageOut[Boolean,Html]] = ???
   }
 
   import programs._

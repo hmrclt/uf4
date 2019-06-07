@@ -1,21 +1,9 @@
 package ltbs.uniform
-package interpreters.playframework
+package common.web
 
 import concurrent.Future
 
-trait FormField[A, Html]{
-  def encode(in: A): Input
-  def decode(out: Input): Either[ErrorTree,A]
-  def render(
-    key: List[String],
-    path: Path,
-    data: Option[Input],
-    errors: ErrorTree,
-    messages: UniformMessages[Html]
-  ): Html
-}
-
-class SimpleForm[A, Html](field: FormField[A, Html]) extends GenericPlayAsk[A, Html] {
+class SimpleForm[A, Html](field: FormField[A, Html]) extends GenericWebAsk[A, Html] {
 
   def page(
     currentId: List[String], // the current step in the journey
@@ -68,7 +56,7 @@ class SimpleForm[A, Html](field: FormField[A, Html]) extends GenericPlayAsk[A, H
       }
     } else {
       dbObject match {
-        case Some(Right(data)) if targetId != Nil && !path.contains(targetId) =>
+        case Some(Right(data)) if targetId =!= Nil && !path.contains(targetId) =>
           // they're replaying the journey
           Future.successful(PageOut(currentId :: path, db, AskResult.Success(data)))
         case _ =>

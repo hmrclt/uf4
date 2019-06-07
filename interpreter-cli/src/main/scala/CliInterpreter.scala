@@ -64,7 +64,7 @@ object CliApp extends App {
 
   def askCliInstance[A](f: String => Either[String,A]) = new AskCli[A] {
     @annotation.tailrec
-    def apply(key: String, validation: List[List[Rul[eA]]]): A = {
+    def apply(key: String, validation: List[List[Rule[A]]]): A = {
       print(s"$key: ")
       val rawIn = io.StdIn.readLine()
 
