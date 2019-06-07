@@ -5,8 +5,8 @@ import ltbs.uniform._
 
 import language.implicitConversions
 
-package object programs {
 
+package programs {
   case class DataType1(i: String)
   case class DataType2(i: String)
   case class DataType3(i: String)
@@ -107,6 +107,10 @@ package object programs {
   case class DataType98(i: String)
   case class DataType99(i: String)
   case class DataType100(i: String)
+}
+
+package object programs {
+
 
   type TellTypes = NilTypes
   type AskTypes = (Int, Int) :: Int :: Boolean :: NilTypes
@@ -117,8 +121,8 @@ package object programs {
     import interpreter._
     for {
       age           <- ask[Int]("age")
-      h2           <- ask[(Int,Int)]("height")
-      height3           <- ask[Int]("height3")                  
+      h2            <- ask[(Int,Int)]("height")
+      height3       <- ask[Int]("height3")                  
       food          <- ask[Boolean]("wantFood")
       tea           <- ask[Boolean]("wantTea")
       baconCost     <- ask[Int]("bacon").map(_ * 12) emptyUnless food
@@ -133,12 +137,111 @@ package object programs {
   type TellTypes2 = NilTypes
   type AskTypes2 = DataType1 :: DataType2 :: DataType3 :: DataType4 :: DataType5 :: DataType6 :: DataType7 :: DataType8 :: DataType9 :: DataType10 :: DataType11 :: DataType12 :: DataType13 :: DataType14 :: DataType15 :: DataType16 :: DataType17 :: DataType18 :: DataType19 :: DataType20 :: DataType21 :: DataType22 :: DataType23 :: DataType24 :: DataType25 :: DataType26 :: DataType27 :: DataType28 :: DataType29 :: DataType30 :: DataType31 :: DataType32 :: DataType33 :: DataType34 :: DataType35 :: DataType36 :: DataType37 :: DataType38 :: DataType39 :: DataType40 :: DataType41 :: DataType42 :: DataType43 :: DataType44 :: DataType45 :: DataType46 :: DataType47 :: DataType48 :: DataType49 :: DataType50 :: DataType51 :: DataType52 :: DataType53 :: DataType54 :: DataType55 :: DataType56 :: DataType57 :: DataType58 :: DataType59 :: DataType60 :: DataType61 :: DataType62 :: DataType63 :: DataType64 :: DataType65 :: DataType66 :: DataType67 :: DataType68 :: DataType69 :: DataType70 :: DataType71 :: DataType72 :: DataType73 :: DataType74 :: DataType75 :: DataType76 :: DataType77 :: DataType78 :: DataType79 :: DataType80 :: DataType81 :: DataType82 :: DataType83 :: DataType84 :: DataType85 :: DataType86 :: DataType87 :: DataType88 :: DataType89 :: DataType90 :: DataType91 :: DataType92 :: DataType93 :: DataType94 :: DataType95 :: DataType96 :: DataType97 :: DataType98 :: DataType99 :: DataType100 :: NilTypes
 
-  def greasy2[F[_]: Monad](
+  def crazyTypesProgram[F[_]: Monad](
     interpreter: Language[F, TellTypes2, AskTypes2]
   ): F[Unit] = {
     import interpreter._
     for {
       _   <- ask[DataType1]("one")
+      _   <- ask[DataType2]("two")
+      _   <- ask[DataType3]("three")
+      _   <- ask[DataType4]("four")
+      _   <- ask[DataType5]("five")
+      _   <- ask[DataType6]("six")
+      _   <- ask[DataType7]("seven")
+      _   <- ask[DataType8]("eight")
+      _   <- ask[DataType9]("nine")
+      _   <- ask[DataType10]("ten")
+      _   <- ask[DataType11]("eleven")
+      _   <- ask[DataType12]("twelve")
+      _   <- ask[DataType13]("thirteen")
+      _   <- ask[DataType14]("fourteen")
+      _   <- ask[DataType15]("fifteen")
+      _   <- ask[DataType16]("sixteen")
+      _   <- ask[DataType17]("seventeen")
+      _   <- ask[DataType18]("eighteen")
+      _   <- ask[DataType19]("nineteen")
+      _   <- ask[DataType20]("twenty")
+      _   <- ask[DataType21]("twenty-one")
+      _   <- ask[DataType22]("twenty-two")
+      _   <- ask[DataType23]("twenty-three")
+      _   <- ask[DataType24]("twenty-four")
+      _   <- ask[DataType25]("twenty-five")
+      _   <- ask[DataType26]("twenty-six")
+      _   <- ask[DataType27]("twenty-seven")
+      _   <- ask[DataType28]("twenty-eight")
+      _   <- ask[DataType29]("twenty-nine")
+      _   <- ask[DataType30]("thirty")
+      _   <- ask[DataType31]("thirty-one")
+      _   <- ask[DataType32]("thirty-two")
+      _   <- ask[DataType33]("thirty-three")
+      _   <- ask[DataType34]("thirty-four")
+      _   <- ask[DataType35]("thirty-five")
+      _   <- ask[DataType36]("thirty-six")
+      _   <- ask[DataType37]("thirty-seven")
+      _   <- ask[DataType38]("thirty-eight")
+      _   <- ask[DataType39]("thirty-nine")
+      _   <- ask[DataType40]("forty")
+      _   <- ask[DataType41]("forty-one")
+      _   <- ask[DataType42]("forty-two")
+      _   <- ask[DataType43]("forty-three")
+      _   <- ask[DataType44]("forty-four")
+      _   <- ask[DataType45]("forty-five")
+      _   <- ask[DataType46]("forty-six")
+      _   <- ask[DataType47]("forty-seven")
+      _   <- ask[DataType48]("forty-eight")
+      _   <- ask[DataType49]("forty-nine")
+      _   <- ask[DataType50]("fifty")
+      _   <- ask[DataType51]("fifty-one")
+      _   <- ask[DataType52]("fifty-two")
+      _   <- ask[DataType53]("fifty-three")
+      _   <- ask[DataType54]("fifty-four")
+      _   <- ask[DataType55]("fifty-five")
+      _   <- ask[DataType56]("fifty-six")
+      _   <- ask[DataType57]("fifty-seven")
+      _   <- ask[DataType58]("fifty-eight")
+      _   <- ask[DataType59]("fifty-nine")
+      _   <- ask[DataType60]("sixty")
+      _   <- ask[DataType61]("sixty-one")
+      _   <- ask[DataType62]("sixty-two")
+      _   <- ask[DataType63]("sixty-three")
+      _   <- ask[DataType64]("sixty-four")
+      _   <- ask[DataType65]("sixty-five")
+      _   <- ask[DataType66]("sixty-six")
+      _   <- ask[DataType67]("sixty-seven")
+      _   <- ask[DataType68]("sixty-eight")
+      _   <- ask[DataType69]("sixty-nine")
+      _   <- ask[DataType70]("seventy")
+      _   <- ask[DataType71]("seventy-one")
+      _   <- ask[DataType72]("seventy-two")
+      _   <- ask[DataType73]("seventy-three")
+      _   <- ask[DataType74]("seventy-four")
+      _   <- ask[DataType75]("seventy-five")
+      _   <- ask[DataType76]("seventy-six")
+      _   <- ask[DataType77]("seventy-seven")
+      _   <- ask[DataType78]("seventy-eight")
+      _   <- ask[DataType79]("seventy-nine")
+      _   <- ask[DataType80]("eighty")
+      _   <- ask[DataType81]("eighty-one")
+      _   <- ask[DataType82]("eighty-two")
+      _   <- ask[DataType83]("eighty-three")
+      _   <- ask[DataType84]("eighty-four")
+      _   <- ask[DataType85]("eighty-five")
+      _   <- ask[DataType86]("eighty-six")
+      _   <- ask[DataType87]("eighty-seven")
+      _   <- ask[DataType88]("eighty-eight")
+      _   <- ask[DataType89]("eighty-nine")
+      _   <- ask[DataType90]("ninety")
+      _   <- ask[DataType91]("ninety-one")
+      _   <- ask[DataType92]("ninety-two")
+      _   <- ask[DataType93]("ninety-three")
+      _   <- ask[DataType94]("ninety-four")
+      _   <- ask[DataType95]("ninety-five")
+      _   <- ask[DataType96]("ninety-six")
+      _   <- ask[DataType97]("ninety-seven")
+      _   <- ask[DataType98]("ninety-eight")
+      _   <- ask[DataType99]("ninety-nine")
+      _   <- ask[DataType100]("one-hundred")
     } yield (())
   }
 

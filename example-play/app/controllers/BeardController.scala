@@ -36,21 +36,19 @@ class BeardController @Inject()(implicit val messagesApi: MessagesApi) extends P
 
   implicit val persistence: PersistenceEngine = DebugPersistence(UnsafePersistence())
 
-  implicit val twirlIntField = new FormField[Int,Html] {
-    def decode(out: Input): Either[ErrorTree,Int] = {
+  implicit val twirlStringField = new FormField[String,Html] {
+    def decode(out: Input): Either[ErrorTree,String] = {
       println(s"decode: $out")
       val root: Option[String] = out.valueAtRoot
         .flatMap(_.filter(_.trim.nonEmpty).headOption)
 
       root match {
         case None => Left(ErrorMsg("required").toTree)
-        case Some(data) =>
-          Either.catchOnly[NumberFormatException](data.toInt)
-            .leftMap(_ => ErrorMsg("bad.value").toTree)
+        case Some(data) => Right(data)
       }
     }
 
-    def encode(in: Int): Input = Input.one(List(in.toString))
+    def encode(in: String): Input = Input.one(List(in))
     def render(
       key: List[String],
       path: Path,
@@ -63,6 +61,12 @@ class BeardController @Inject()(implicit val messagesApi: MessagesApi) extends P
       views.html.uniform.string(key, existingValue, errors, messages)
     }
   }
+
+  implicit val twirlIntField2: FormField[Int,Html] =
+    twirlStringField.simap(x =>
+      Either.catchOnly[NumberFormatException](x.toInt)
+        .leftMap(_ => ErrorMsg("bad.value").toTree)
+    )(_.toString)
 
   implicit val askBoolean = new PlayAsk[Boolean] {
     def page(
