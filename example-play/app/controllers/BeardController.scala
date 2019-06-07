@@ -9,9 +9,13 @@ import play.api.mvc._
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent._
 import play.twirl.api.{Html, HtmlFormat}
+import uk.gov.hmrc.nunjucks.{NunjucksRenderer, NunjucksSupport}
 
 @Singleton
-class BeardController @Inject()(implicit val messagesApi: MessagesApi) extends PlayInterpreter[Html] with I18nSupport {
+class BeardController @Inject()(
+  implicit val messagesApi: MessagesApi,
+  val renderer: NunjucksRenderer
+) extends PlayInterpreter[Html] with I18nSupport {
 
   val mon: Monoid[Html] = new Monoid[Html] {
     def empty: Html = Html("")

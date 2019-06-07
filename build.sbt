@@ -97,7 +97,10 @@ lazy val `example-play` = project.settings(commonSettings)
       filters,
       guice
     ),
-    libraryDependencies += "org.scalatest" %%% "scalatest" % "3.0.5" % "test",
+    libraryDependencies ++= Seq(
+      "org.scalatest" %%% "scalatest" % "3.0.5" % "test",
+      "uk.gov.hmrc" %% "play-nunjucks-spike" % "0.4.0-SNAPSHOT"
+    ),
     initialCommands in console := "import cats.implicits._; import ltbs.uniform._; import ltbs.uniform.interpreters.playframework._; implicit val messages: Messages = NoopMessages",
     initialCommands in consoleQuick := """import cats.implicits._;"""
   )
