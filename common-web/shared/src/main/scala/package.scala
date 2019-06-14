@@ -27,8 +27,9 @@ package web {
     }
 
     implicit def formToWebAsk[A, Html](
-      implicit field: FormField[A, Html]
-    ): GenericWebAsk[A, Html] = new SimpleForm(field)
+      implicit codec: FormFieldEncoding[A],
+       renderer: FormFieldPresentation[A,Html]
+    ): GenericWebAsk[A, Html] = new SimpleForm(InferFormField.combine(codec,renderer))
 
   }
 }

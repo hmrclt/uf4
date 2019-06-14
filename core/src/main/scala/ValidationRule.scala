@@ -5,6 +5,10 @@ import cats.Monoid
 import cats.data.NonEmptyList
 
 case class ErrorMsg(msg: String, args: Any*) {
+
+  def prefixWith(in: List[String]): ErrorMsg =
+    ErrorMsg(in.mkString(".") ++ "." ++ msg, args:_*)
+
   def render[A](msgProvider: UniformMessages[A]): A =
     msgProvider(msg, args:_*)
 

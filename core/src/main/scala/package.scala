@@ -4,11 +4,26 @@ import cats.implicits._
 import cats.{Monoid, Applicative, Monad}
 import cats.data.NonEmptyList
 import language.higherKinds
+import shapeless.tag.@@
 
 package object uniform extends TreeLike.ToTreeLikeOps with TreeLikeInstances {
 
+  /** Used to represent multi-line input. 
+    * 
+    * Behaves identically to, and can be freely cast to, a
+    * String. However interpreters may decide to treat it
+    * differently - for example a web interpreter will usually render
+    * this a textarea or a cli interpreter may prompt for several
+    * lines. 
+    */
+  type BigString = String @@ BigStringTag
+
   type InputPath = List[String]
   type Input = Map[InputPath, List[String]]
+  type ErrorTree = Map[NonEmptyList[InputPath], NonEmptyList[ErrorMsg]]
+  type ::[H,T <: shapeless.HList] = shapeless.::[H,T]
+  type NilTypes = Unit :: shapeless.HNil
+
   implicit object Input extends MapTree[String, List[String]] {
     def fromUrlEncodedString(in: String): Either[ErrorTree,Input] = {
       val ungrouped: List[(String, String)] =
@@ -34,11 +49,12 @@ package object uniform extends TreeLike.ToTreeLikeOps with TreeLikeInstances {
     }
   }
 
-  type ErrorTree = Map[NonEmptyList[InputPath], NonEmptyList[ErrorMsg]]
-  lazy val ErrorTree = treeLikeErrorTree
-
-  type ::[H,T <: shapeless.HList] = shapeless.::[H,T]
-  type NilTypes = Unit :: shapeless.HNil
+  implicit class RichErrorTree(a: ErrorTree) {
+    def valueAtRootList: List[ErrorMsg] = a.valueAtRoot match {
+      case None => Nil
+      case Some(nel) => nel.toList
+    }
+  }
 
   implicit class RichAppOps[F[_]: Applicative, A](e: F[A]) {
     def emptyUnless(b: => Boolean)(implicit mon: Monoid[A]): F[A] =
@@ -67,5 +83,4 @@ package object uniform extends TreeLike.ToTreeLikeOps with TreeLikeInstances {
       }
     }
   }
-
 }

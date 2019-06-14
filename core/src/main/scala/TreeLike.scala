@@ -9,7 +9,8 @@ import cats.data.{NonEmptyList => NEL}
   type Key
   type Value
 
-  def prefixWith(a: T, key: Key): T
+  def appendWith(a: T, key: Key): T
+  def prefixWith(a: T, key: Key): T  
 
   def subTree(a: T, key: Key): T
   def /(a: T, key: Key): T = subTree(a,key)
@@ -69,12 +70,17 @@ trait TreeLikeInstances {
     def one(in: Value): T = Map(List.empty[Key] -> in)
     def valueAtRoot(a: T): Option[Value] = a.get(List.empty[Key])
 
-    def prefixWith(a: T, key: Key): T = a.map{ case (k,v) =>
+    def appendWith(a: T, key: Key): T = a.map{ case (k,v) =>
       (k :+ key) -> v
     }
+
+    def prefixWith(a: T, key: Key): T = a.map{ case (k,v) =>
+      (key :: k) -> v
+    }
+    
   }
 
-  implicit val treeLikeErrorTree = new TreeLike[ErrorTree] {
+  implicit object ErrorTree extends TreeLike[ErrorTree] {
 
     type Key = String
     type Value = NEL[ErrorMsg]
@@ -100,11 +106,6 @@ trait TreeLikeInstances {
       NEL.one(Nil) -> NEL.one(in)
     )
 
-    def valueAtRootList(a: ErrorTree): List[ErrorMsg] = valueAtRoot(a) match {
-      case None => Nil
-      case Some(nel) => nel.toList
-    }
-
     def valueAtRoot(a: ErrorTree): Option[NEL[ErrorMsg]] = a.get(NEL.one(Nil))
 
     def simplified(a: ErrorTree): Map[InputPath, ErrorMsg] = a flatMap {
@@ -114,9 +115,14 @@ trait TreeLikeInstances {
         }
     }
 
-    def prefixWith(a: ErrorTree, key: String): ErrorTree = 
+    def appendWith(a: ErrorTree, key: String): ErrorTree = 
       a.map{ case (k,v) =>
         (k.map{_ :+ key}) -> v
+      }
+
+    def prefixWith(a: ErrorTree, key: String): ErrorTree = 
+      a.map{ case (k,v) =>
+        (k.map{key :: _}) -> v
       }
 
   }

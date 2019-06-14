@@ -4,6 +4,7 @@ import shapeless.{HNil => _, `::` => _, _}, ops.hlist.Selector
 import reflect.runtime.universe.WeakTypeTag
 import scala.language.higherKinds
 
+
 trait Language[UF[_], SupportedTell <: HList, SupportedAsk <: HList]{
 
   def interact[Tell: WeakTypeTag, Ask: WeakTypeTag](
@@ -26,7 +27,7 @@ trait Language[UF[_], SupportedTell <: HList, SupportedAsk <: HList]{
   )(
     implicit selectorAsk : Selector[SupportedAsk, A],
     selectorTell : Selector[SupportedTell, Unit]
-  ): UF[A] = interact[Unit,A](id, (), default, validation, customContent)
+  ) = interact[Unit,A](id, (), default, validation, customContent)
 
   def tell[A: WeakTypeTag](
     id: String,
@@ -35,6 +36,6 @@ trait Language[UF[_], SupportedTell <: HList, SupportedAsk <: HList]{
   )(
     implicit selectorAsk : Selector[SupportedAsk, Unit],
     selectorTell : Selector[SupportedTell, A]
-  ): UF[Unit] = interact[A,Unit](id, t, customContent=customContent)
+  ) = interact[A,Unit](id, t, customContent=customContent)
 
 }

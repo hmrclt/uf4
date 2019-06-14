@@ -9,12 +9,10 @@ import play.api.mvc._
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent._
 import play.twirl.api.{Html, HtmlFormat}
-import uk.gov.hmrc.nunjucks.{NunjucksRenderer, NunjucksSupport}
 
 @Singleton
 class BeardController @Inject()(
-  implicit val messagesApi: MessagesApi,
-  val renderer: NunjucksRenderer
+  implicit val messagesApi: MessagesApi
 ) extends PlayInterpreter[Html] with I18nSupport {
 
   val mon: Monoid[Html] = new Monoid[Html] {
@@ -23,7 +21,7 @@ class BeardController @Inject()(
   }
 
   def messages(request: Request[AnyContent], customContent: Map[String,(String, List[Any])]): UniformMessages[Html] = (
-//    convertMessages(messagesApi.preferred(request)) |+|
+    this.convertMessages(messagesApi.preferred(request)) |+|
       UniformMessages.bestGuess.map(HtmlFormat.escape)
   )
 
@@ -36,9 +34,87 @@ class BeardController @Inject()(
     request: Request[AnyContent],
     messages: UniformMessages[Html]
   ): Html = 
-      views.html.chrome(key.mkString("."), errors, Html(tell.toString + ask.toString), breadcrumbs)(messages, request)
+      views.html.chrome(key, errors, Html(tell.toString + ask.toString), breadcrumbs)(messages, request)
+
+  def selectionOfFields(
+    inner: List[(String, (List[String], Path, Option[Input], ErrorTree, UniformMessages[Html]) => Html)]
+  )(key: List[String], path: Path, values: Option[Input], errors: ErrorTree, messages: UniformMessages[Html]): Html = {
+    val value: Option[String] = values.fold(none[String])(_.valueAtRoot.flatMap{_.headOption})
+    views.html.uniform.radios(
+      key,
+      inner.map{_._1},
+      value,
+      errors,
+      messages,
+      inner.map{
+        case(subkey,f) => subkey -> f(key :+ subkey, path, values.map{_ / subkey}, errors / subkey, messages)
+      }.filter(_._2.toString.trim.nonEmpty).toMap
+    )
+  }
 
   implicit val persistence: PersistenceEngine = DebugPersistence(UnsafePersistence())
+
+  implicit val twirlBigStringField = new FormField[BigString,Html] {
+    import shapeless.tag
+    def decode(out: Input): Either[ErrorTree,BigString] = {
+      val root: Option[BigString] = {
+        val asString = out.valueAtRoot
+          .flatMap(_.filter(_.trim.nonEmpty).headOption)
+
+        asString.map{tag[BigStringTag][String]}
+      }
+
+      root match {
+        case None => Left(ErrorMsg("required").toTree)
+        case Some(data) => Right(data)
+      }
+    }
+
+    def encode(in: BigString): Input = Input.one(List(in))
+    def render(
+      key: List[String],
+      path: Path,
+      data: Option[Input],
+      errors: ErrorTree,
+      messages: UniformMessages[Html]
+    ): Html = {
+      println(s"data: $data")
+      val existingValue: String = data.flatMap(_.valueAtRoot.flatMap{_.headOption}).getOrElse("")
+      views.html.uniform.textarea(key, existingValue, errors, messages)
+    }
+  }
+
+  implicit val twirlBooleanField = new FormField[Boolean,Html] {
+    def decode(out: Input): Either[ErrorTree,Boolean] = {
+      println(s"decode: $out")
+      val root: Option[String] = out.valueAtRoot
+        .flatMap(_.filter(_.trim.nonEmpty).headOption)
+
+      root match {
+        case None => Left(ErrorMsg("required").toTree)
+        case Some("TRUE") => Right(true)
+        case Some("FALSE") => Right(false)
+        case _ => Left(ErrorMsg("bad.value").toTree)          
+      }
+    }
+
+    def encode(in: Boolean): Input = in match {
+      case true => Input.one(List("TRUE"))
+      case false => Input.one(List("FALSE"))        
+    }
+
+    def render(
+      key: List[String],
+      path: Path,
+      data: Option[Input],
+      errors: ErrorTree,
+      messages: UniformMessages[Html]
+    ): Html = {
+      val existingValue: Option[String] = data.flatMap(_.valueAtRoot.flatMap{_.headOption})
+      views.html.uniform.radios(key, List("TRUE","FALSE"), existingValue, errors, messages)
+    }
+  }
+
 
   implicit val twirlStringField = new FormField[String,Html] {
     def decode(out: Input): Either[ErrorTree,String] = {
@@ -88,8 +164,10 @@ class BeardController @Inject()(
 
   import programs._
 
+  val doofer1 = implicitly[common.web.FormFieldEncoding[String]]
+
   def beardAction(targetId: String) = Action.async { implicit request: Request[AnyContent] =>
-    val playProgram = greasy(new FuturePlayInterpreter)
+    val playProgram = greasy(new FuturePlayInterpreter[TellTypes, AskTypes])
     run(playProgram, targetId){ _ => Future.successful(Ok("Fin"))}
   }
 

@@ -1,6 +1,6 @@
 @import uniform._, interpreters.playframework._
 
-@(key: String, errors: ErrorTree, content: Html, breadcrumbs: Path)(implicit messages: ltbs.uniform.UniformMessages[Html], request: Request[AnyContent])
+@(key: List[String], errors: ErrorTree, content: Html, breadcrumbs: Path)(implicit messages: ltbs.uniform.UniformMessages[Html], request: Request[AnyContent])
 <!DOCTYPE html>
 <html lang="en" class="govuk-template js-enabled">
   <head>
@@ -29,13 +29,8 @@
       <main class="govuk-main-wrapper " id="main-content" role="main">
         <div id="mainBody">
 
-	  <div style="border: 2px solid green;">
-	    BREADCRUMBS:@{breadcrumbs}
-	    
-	  </div>
-	  
 	  @for(back <- breadcrumbs.headOption) {
-            <a href="@back" class="govuk-back-link">@messages(List(s"back-to-$back","back"))</a>
+            <a href="@back" class="govuk-back-link">@messages({back :+ "back"}.mkString("."))</a>
           }
 	  
 	  @*****************************************
@@ -48,7 +43,7 @@
                   <a class="govuk-breadcrumbs__link" href="@crumb">@messages(List(s"$crumb.breadcrumb", s"$crumb.heading"))</a>
                 </li>
 		}
-                <li class="govuk-breadcrumbs__list-item" aria-current="page">@messages(List(s"$key.breadcrumb", s"$key.heading"))</li>
+                <li class="govuk-breadcrumbs__list-item" aria-current="page">@messages({key :+ "breadcrumb"}.mkString("."))</li>
               </ol>
 	    </div>
           *****************************************@
@@ -56,10 +51,17 @@
 	    @if(errors.nonEmpty) {
 	      @errorsummary(key, Input.empty, errors, messages)
 	    }
-      @helper.form(action = play.api.mvc.Call("post", key)) {
+
+  <div class="govuk-width-container">
+    <main class="govuk-main-wrapper " id="main-content" role="main">
+      <h1 class="govuk-heading-xl">@messages(key.mkString("."))</h1>
+    </main>
+  </div>
+	    
+      @helper.form(action = play.api.mvc.Call("post", key.mkString("/"))) {
         @helper.CSRF.formField 
         @content
-            <button type="submit" class="govuk-button">Save and Continue</button>
+            <button type="submit" class="govuk-button">@messages({key :+ "save.and.continue"}.mkString("."))</button>
       }
         </div>
       </main>

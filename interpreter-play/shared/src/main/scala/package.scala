@@ -2,11 +2,9 @@ package ltbs.uniform
 package interpreters
 
 import cats.data._
-import play.api.mvc.{ Request, Result, AnyContent }
+import play.api._, mvc.{ Request, Result, AnyContent }
 import scala.concurrent.Future
-import cats.syntax.eq._
 import play.twirl.api.{Html => TwirlHtml}
-import common.web._
 
 package object playframework extends common.web.webcommon {
 
@@ -32,5 +30,41 @@ package object playframework extends common.web.webcommon {
     ): TwirlHtml = TwirlHtml("")
   }
 
+
+  implicit class RichTwirlInterpreter(interpreter: PlayInterpreter[TwirlHtml]) {
+    def convertMessages(input: i18n.Messages, escapeHtml: Boolean = false): UniformMessages[TwirlHtml] = {
+      val stringMessages = new UniformMessages[String]{
+        override def apply(key: List[String],args: Any*): String = {
+          input(key, args:_*)
+        }
+        override def apply(key: String,args: Any*): String = {
+          input(key, args:_*)
+        }
+        def get(key: String,args: Any*): Option[String] = if (input.isDefinedAt(key))
+          Some(input.messages(key, args:_*))
+        else
+          None
+
+        override def get(key: List[String],args: Any*): Option[String] = key collectFirst {
+          case k if input.isDefinedAt(k) => input.messages(k, args:_*)
+        }
+
+        def list(key: String,args: Any*): List[String] = {
+          @annotation.tailrec
+          def inner(cnt: Int = 2, acc: List[String] = Nil): List[String] =
+            get(s"$key.$cnt", args:_*) match {
+              case Some(m) => inner(cnt+1, m :: acc)
+              case None    => acc
+            }
+
+          List(key, s"$key.1").map(get(_, args:_*)).flatten ++ inner().reverse
+        }
+      }
+      if (escapeHtml) stringMessages.map(
+        play.twirl.api.HtmlFormat.escape
+      ) else
+          stringMessages.map(TwirlHtml.apply)
+    }
+  }
 
 }

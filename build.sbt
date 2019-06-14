@@ -34,8 +34,7 @@ val commonSettings = Seq(
   libraryDependencies ++= Seq(
     "org.scalatest" %%% "scalatest" % "3.0.5" % "test"
   ),
-  addCompilerPlugin("org.spire-math" %% "kind-projector" % "0.9.3"),
-  wartremoverWarnings in (Compile, compile) ++= Warts.all
+  addCompilerPlugin("org.spire-math" %% "kind-projector" % "0.9.3")
 )
 
 lazy val core = crossProject(JSPlatform, JVMPlatform)
@@ -84,6 +83,26 @@ lazy val `interpreter-cli` = project
   .settings(commonSettings)
   .dependsOn(core.jvm, `common-web`.jvm)
 
+// at present the nunjucks widgets depend upon Play 26
+lazy val `nunjucks-govuk-widgets` = project
+  .settings(commonSettings)
+  .settings(
+    libraryDependencies ++= Seq(
+      "com.typesafe.play" %% "play" % "2.6.20" % "provided",
+      "org.webjars.npm" % "govuk-frontend" % "2.11.0",
+      "uk.gov.hmrc" %% "play-nunjucks-spike" % "0.4.0-SNAPSHOT"
+    )
+  )
+  .dependsOn(core.jvm, `common-web`.jvm)
+
+lazy val `scalatags-govuk-widgets` = crossProject(JSPlatform, JVMPlatform)
+  .crossType(CrossType.Full)
+  .settings(commonSettings)
+  .settings(
+    libraryDependencies += "com.lihaoyi" %%% "scalatags" % "0.6.7"
+  )
+  .dependsOn(core, `common-web`)
+
 lazy val `example-play` = project.settings(commonSettings)
   .enablePlugins(PlayScala)
   .dependsOn(`interpreter-play`.projects(Play26), core.jvm)
@@ -98,9 +117,9 @@ lazy val `example-play` = project.settings(commonSettings)
       guice
     ),
     libraryDependencies ++= Seq(
-      "org.scalatest" %%% "scalatest" % "3.0.5" % "test",
-      "uk.gov.hmrc" %% "play-nunjucks-spike" % "0.4.0-SNAPSHOT"
+      "uk.gov.hmrc" %% "play-nunjucks-spike" % "0.4.0-SNAPSHOT",
+      "org.webjars.npm" % "govuk-frontend" % "2.11.0"
     ),
-    initialCommands in console := "import cats.implicits._; import ltbs.uniform._; import ltbs.uniform.interpreters.playframework._; implicit val messages: Messages = NoopMessages",
+    initialCommands in console := "import cats.implicits._; import ltbs.uniform._; import ltbs.uniform.interpreters.playframework._",
     initialCommands in consoleQuick := """import cats.implicits._;"""
   )
