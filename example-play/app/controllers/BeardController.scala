@@ -78,7 +78,6 @@ class BeardController @Inject()(
       errors: ErrorTree,
       messages: UniformMessages[Html]
     ): Html = {
-      println(s"data: $data")
       val existingValue: String = data.flatMap(_.valueAtRoot.flatMap{_.headOption}).getOrElse("")
       views.html.uniform.textarea(key, existingValue, errors, messages)
     }
@@ -86,7 +85,6 @@ class BeardController @Inject()(
 
   implicit val twirlBooleanField = new FormField[Boolean,Html] {
     def decode(out: Input): Either[ErrorTree,Boolean] = {
-      println(s"decode: $out")
       val root: Option[String] = out.valueAtRoot
         .flatMap(_.filter(_.trim.nonEmpty).headOption)
 

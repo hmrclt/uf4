@@ -116,10 +116,6 @@ lazy val `example-play` = project.settings(commonSettings)
       filters,
       guice
     ),
-    libraryDependencies ++= Seq(
-      "uk.gov.hmrc" %% "play-nunjucks-spike" % "0.4.0-SNAPSHOT",
-      "org.webjars.npm" % "govuk-frontend" % "2.11.0"
-    ),
     initialCommands in console := "import cats.implicits._; import ltbs.uniform._; import ltbs.uniform.interpreters.playframework._",
     initialCommands in consoleQuick := """import cats.implicits._;"""
   )
